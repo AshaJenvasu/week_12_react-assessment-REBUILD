@@ -1,4 +1,23 @@
+import { useEffect } from "react";
+
+import escanorVoiceUrl from "../assets/escanor.mp3";
+
 export const Owner = () => {
+  useEffect(() => {
+    // 1. สร้างวัตถุชี้เป้าไปที่ไฟล์เสียงในโฟลเดอร์ public เดิมของหนู
+    const escanorVoice = new Audio(escanorVoiceUrl);
+
+    // 2. ปรับระดับความดังตามใจสั่ง (0.0 - 1.0)
+    escanorVoice.volume = 0.5;
+
+    // 3. สั่งคำรามทันทีที่ Component ถูกวาดเสร็จ (Mounting)
+    escanorVoice.play().catch((err) => {
+      console.log("Audio play blocked:", err);
+    });
+    return () => {
+      escanorVoice.pause();
+    };
+  }, []);
   return (
     <div className="flex flex-col items-center pt-24 px-10 min-h-screen bg-gradient-to-b from-amber-100 to-[#EAEAEA]">
       {/* 1. Header  */}

@@ -72,10 +72,13 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       // ยิงไปที่ Route (POST /auth/logout)
-      const res = await fetch("http://localhost:3000/api/v2/auth/logout", {
-        method: "POST",
-        credentials: "include", // สั่งให้ส่งคุกกี้ไปเพื่ออ้างอิงและทำลายทิ้งที่หลังบ้าน
-      });
+      const res = await fetch(
+        "http://localhost:3000/api/v2/users/auth/logout",
+        {
+          method: "POST",
+          credentials: "include", // สั่งให้ส่งคุกกี้ไปเพื่ออ้างอิงและทำลายทิ้งที่หลังบ้าน
+        },
+      );
 
       if (res.ok) {
         setUser(null); // ออกจากระบบสําเร็จ! ล้างข้อมูลผู้ใช้จาก State ส่วนกลาง
@@ -85,10 +88,44 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // 5.55 💡 ฟังก์ชันสมัครสมาชิก
+  const register = async (username, email, password) => {
+    try {
+      setAuthError(null);
+      // ยิงไปที่ท่อสมัครสมาชิกของหลังบ้าน (ตรวจสอบเส้นทางของหนูอีกทีน้าว่ามีคำว่า users ไหม)
+      const res = await fetch("http://localhost:3000/api/v2/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // 🌟 เพื่อความสะดวกสบาย สมัครเสร็จปุ๊บ สั่งเรียกฟังก์ชัน login ต่อให้เลยทันทีจ้ะ!
+        return await login(email, password);
+      } else {
+        setAuthError(data.message || "Registration failed");
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      setAuthError("Server error during registration");
+      return { success: false, message: "Server error" };
+    }
+  };
+
   // 6. 💡 ส่งสัญญาณค่า State และฟังก์ชันทั้งหมดออกไปนอกบ้าน ให้ทุก Component หยิบไปใช้ได้
   return (
     <AuthContext.Provider
-      value={{ user, authLoading, authError, login, logout, checkSession }}
+      value={{
+        user,
+        authLoading,
+        authError,
+        login,
+        logout,
+        checkSession,
+        register,
+      }}
     >
       {children}
     </AuthContext.Provider>

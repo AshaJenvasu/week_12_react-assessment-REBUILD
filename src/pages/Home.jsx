@@ -5,10 +5,11 @@ import Header from "../components/Home/01_Header";
 import NavButtons from "../components/Home/02_NavButtons";
 import Display from "../components/Home/03_Display";
 import LoginForm from "../components/Home/04_LoginForm";
+import RegisterForm from "../components/Home/05_RegisterForm";
 
 const Home = () => {
   const { user, authLoading } = useAuth();
-
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [activeSection, setActiveSection] = useState("");
   const [members, setMembers] = useState([]);
   const [formData, setFormData] = useState({
@@ -101,7 +102,7 @@ const Home = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6]">
         {/* แอนิเมชันวงกลมหมุนๆ สไตล์ Tailwind */}
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-600 mb-4"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-amber-600 mb-4"></div>
         <p className="text-xl font-black text-brown-950 italic animate-pulse">
           {`"Who decided the web is ready? I am checking your session..."`}
         </p>
@@ -114,15 +115,43 @@ const Home = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6] px-6">
-        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-amber-500  text-center">
+        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-amber-500 text-center">
           <h2 className="text-3xl font-extrabold text-brown-950 mb-2">
             ESCANOR PROJECT
           </h2>
           <p className="text-gray-500 italic mb-6">
-            "Stand at the pinnacle of power. Please Login."
+            {isLoginMode
+              ? `"Stand at the pinnacle of power. Please Login."`
+              : `"Join the ranks of the mighty. Please Sign Up."`}
           </p>
 
-          <LoginForm />
+          {/* 💡 3. ตรวจสอบเงื่อนไข: สลับกล่องฟอร์มตามสถานะของ State ตัวบน */}
+          {isLoginMode ? <LoginForm /> : <RegisterForm />}
+
+          {/* 💡 4. แถบลิงก์กดสลับโหมดด้านล่างฟอร์ม เพื่อเปลี่ยนสถานะ State ไหลลื่น */}
+          <div className="mt-6 text-sm text-gray-600">
+            {isLoginMode ? (
+              <p>
+                Don't have an account?{" "}
+                <button
+                  onClick={() => setIsLoginMode(false)}
+                  className="text-orange-600 font-bold hover:underline"
+                >
+                  Sign Up
+                </button>
+              </p>
+            ) : (
+              <p>
+                Already have an account?{" "}
+                <button
+                  onClick={() => setIsLoginMode(true)}
+                  className="text-orange-600 font-bold hover:underline"
+                >
+                  Log In
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );

@@ -1,1 +1,11 @@
 @import "tailwindcss";
+
+/* 💡 สูตรทุบโต๊ะ: บังคับรากฐานลึกสุดของระบบให้กลืนเป็นสีดำสนิท */
+html,
+body,
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100vh !important;
+  background-color: #000000 !important; /* 🖤 เปลี่ยนพื้นหลังลึกสุดเป็นสีดำเพื่อกลืนกับ Footer จ้ะ */
+}

@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     try {
       setAuthLoading(true);
       // ยิงไปที่ Route  (GET /auth/me)
-      const res = await fetch("http://localhost:3000/api/v2/auth/me", {
+      const res = await fetch("http://localhost:3000/api/v2/users/auth/me", {
         method: "GET",
         credentials: "include",
         // 🔑 ตรงนี้สำคัญมาก! สั่งให้ fetch ยอมแนบคุกกี้ล็อกอินข้ามฝั่งไปด้วย
@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
       if (res.ok) {
         const data = await res.json();
-        setUser(data.data); // 💡 สมมติหลังบ้านส่ง { success: true, data: userObject } ให้เซ็ตข้อมูลลง State user
+        setUser(data.user); // 💡 สมมติหลังบ้านส่ง { success: true, user: userObject } ให้เซ็ตข้อมูลลง State user
       } else {
         setUser(null);
         // ถ้าไม่มีโทเค็นหรือโทเค็นหมดอายุ ให้คนนั้นเป็นสถานะไม่ได้ล็อกอิน
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
     try {
       setAuthError(null); // ยิงไปที่ Route (POST /login)
 
-      const res = await fetch("http://localhost:3000/api/v2/auth/login", {
+      const res = await fetch("http://localhost:3000/api/v2/users/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,14 +56,14 @@ export function AuthProvider({ children }) {
       const data = await res.json();
 
       if (res.ok) {
-        setUser(data.data); // ล็อกอินสำเร็จ! จำค่าผู้ใช้ลง State ส่วนกลาง
+        setUser(data.user); // ล็อกอินสำเร็จ! จำค่าผู้ใช้ลง State ส่วนกลาง
         return { success: true };
       } else {
-        setAuthError(data.message || "Invalid credentials");
+        setAuthError("Incorrect email or password. Please try again.");
         return { success: false, message: data.message };
       }
     } catch (error) {
-      setAuthError("Server error. Please try again later.");
+      setAuthError(error.message || "Invalid credentials");
       return { success: false, message: "Server error" };
     }
   };

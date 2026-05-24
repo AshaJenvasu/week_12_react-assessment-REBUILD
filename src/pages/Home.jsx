@@ -4,9 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import Header from "../components/Home/01_Header";
 import NavButtons from "../components/Home/02_NavButtons";
 import Display from "../components/Home/03_Display";
+import LoginForm from "../components/Home/04_LoginForm";
 
 const Home = () => {
-  const { user, authLoading, login } = useAuth();
+  const { user, authLoading } = useAuth();
 
   const [activeSection, setActiveSection] = useState("");
   const [members, setMembers] = useState([]);
@@ -113,7 +114,7 @@ const Home = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6] px-6">
-        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-orange-600 text-center">
+        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-amber-500  text-center">
           <h2 className="text-3xl font-extrabold text-brown-950 mb-2">
             ESCANOR PROJECT
           </h2>
@@ -121,10 +122,7 @@ const Home = () => {
             "Stand at the pinnacle of power. Please Login."
           </p>
 
-          {/* เดี๋ยวเราจะมาสร้างฟอร์มกรอก Login เล็กๆ ยิงเข้าฟังก์ชัน login ตรงนี้กันในขั้นตอนถัดไปจ้ะ */}
-          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-700">
-            [ เดี๋ยวเราจะมาเสียบกล่อง Login Form ]
-          </div>
+          <LoginForm />
         </div>
       </div>
     );

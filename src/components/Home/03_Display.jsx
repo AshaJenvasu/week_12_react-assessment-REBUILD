@@ -1,3 +1,5 @@
+import { useAuth } from "../../context/AuthContext";
+
 import Table from "../Table";
 
 const Display = ({
@@ -8,6 +10,7 @@ const Display = ({
   formData,
   setFormData,
 }) => {
+  const { user } = useAuth();
   return (
     <div className="w-full max-w-5xl mt-10 p-10 bg-white rounded-2xl shadow-xl border-t-8 border-orange-600">
       {!activeSection && (
@@ -27,7 +30,7 @@ const Display = ({
         </div>
       )}
       {/* 🛠️ โหมด Admin Control Panel */}
-      {activeSection === "admin" && (
+      {activeSection === "admin" && user.role === "admin" && (
         <div className="text-center w-full">
           <h2 className="text-4xl font-extrabold text-orange-700 mb-8">
             Admin Control Panel

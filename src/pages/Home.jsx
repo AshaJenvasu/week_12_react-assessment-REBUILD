@@ -8,22 +8,23 @@ const Home = () => {
   const [activeSection, setActiveSection] = useState("");
   const [members, setMembers] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
-    lastname: "",
-    position: "",
+    username: "",
+    email: "",
+    password: "",
+    role: "",
   });
 
   const fetchData = async () => {
     try {
-      const res = await fetch(
-        "https://67eca027aa794fb3222e43e2.mockapi.io/members",
-      );
+      const res = await fetch("http://localhost:3000/api/v2/users");
       if (!res.ok) {
         throw new Error("Failed to fetch data");
       }
+
       const data = await res.json();
-      setMembers(data);
-      console.log("Data fetched successfully:", data);
+      // 💡 จุดเปลี่ยนสำคัญ: เราต้องสั่งดักเข้าคีย์ .data เพื่อเอา Array ข้างในส่งให้ setMembers
+      setMembers(data.data);
+      console.log("Data fetched successfully:", data.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -50,14 +51,11 @@ const Home = () => {
     )
       return;
     try {
-      const res = await fetch(
-        `https://67eca027aa794fb3222e43e2.mockapi.io/members/${id}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const res = await fetch(`http://localhost:3000/api/v2/users/${id}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
-        setMembers(members.filter((member) => member.id !== id));
+        setMembers(members.filter((member) => member._id !== id));
         alert("Erase successfully! The pride remains.");
       }
     } catch (error) {
@@ -68,23 +66,21 @@ const Home = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        "https://67eca027aa794fb3222e43e2.mockapi.io/members",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+      const res = await fetch("http://localhost:3000/api/v2/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(formData),
+      });
       if (res.ok) {
         const newMember = await res.json();
-        setMembers([...members, newMember]);
+        setMembers([...members, newMember.data]);
         setFormData({
-          name: "",
-          lastname: "",
-          position: "",
+          username: "",
+          email: "",
+          password: "",
+          role: "",
         });
         alert("New warrior added to the ranks!");
       }

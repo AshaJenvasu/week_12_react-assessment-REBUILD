@@ -5,11 +5,9 @@ const Table = ({ data, isAdmin, onDelete }) => {
         {/* Table Header  */}
         <thead>
           <tr className="bg-amber-400 text-brown-950 uppercase text-sm leading-normal">
-            <th className="py-4 px-6 border-b-2 border-orange-700">Name</th>
-            <th className="py-4 px-6 border-b-2 border-orange-700">
-              Last Name
-            </th>
-            <th className="py-4 px-6 border-b-2 border-orange-700">Position</th>
+            <th className="py-4 px-6 border-b-2 border-orange-700">Username</th>
+            <th className="py-4 px-6 border-b-2 border-orange-700">Email</th>
+            <th className="py-4 px-6 border-b-2 border-orange-700">Role</th>
             {/* ถ้าเป็น Admin ให้โชว์หัวข้อ Action */}
             {isAdmin && (
               <th className="py-4 px-6 border-b-2 border-orange-700 text-center">
@@ -24,18 +22,18 @@ const Table = ({ data, isAdmin, onDelete }) => {
           {data.length > 0 ? (
             data.map((member) => (
               <tr
-                key={member.id}
+                key={member._id}
                 className="border-b border-orange-200 hover:bg-orange-50 transition-colors"
               >
-                <td className="py-4 px-6">{member.name}</td>
-                <td className="py-4 px-6">{member.lastname}</td>
-                <td className="py-4 px-6">{member.position}</td>
+                <td className="py-4 px-6">{member.username}</td>
+                <td className="py-4 px-6">{member.email}</td>
+                <td className="py-4 px-6">{member.role}</td>
 
                 {/* ถ้าเป็น Admin ให้โชว์ปุ่ม Delete */}
                 {isAdmin && (
                   <td className="py-4 px-6 text-center">
                     <button
-                      onClick={() => onDelete(member.id)}
+                      onClick={() => onDelete(member._id)}
                       className="bg-red-600 text-white px-4 py-2 rounded-lg font-black hover:bg-red-800 hover:shadow-lg hover:shadow-red-500/50 transition-all transform hover:scale-110"
                     >
                       DELETE

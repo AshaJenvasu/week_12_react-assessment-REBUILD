@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 
 import Header from "../components/Home/01_Header";
 import NavButtons from "../components/Home/02_NavButtons";
 import Display from "../components/Home/03_Display";
 
 const Home = () => {
+  const { user, authLoading, login } = useAuth();
+
   const [activeSection, setActiveSection] = useState("");
   const [members, setMembers] = useState([]);
   const [formData, setFormData] = useState({
@@ -29,10 +32,6 @@ const Home = () => {
       console.error("Error fetching data:", error);
     }
   };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   const getButtonClass = (section) => {
     const baseClass =
@@ -88,6 +87,48 @@ const Home = () => {
       console.error("Error creating member:", error);
     }
   };
+  // จะสั่งดึงข้อมูลผู้ใช้จากหลังบ้าน ก็ต่อเมื่อ "เช็กคุกกี้เสร็จแล้ว" และ "มีผู้ใช้ล็อกอินอยู่จริง" เท่านั้น
+  useEffect(() => {
+    if (!authLoading && user) {
+      fetchData();
+    }
+  }, [authLoading, user]);
+  // =========================================================
+  // 🛡️ บล็อกที่ 1: หน้าจอ Loading Screen ดักวินาทีแรกสุด
+  // =========================================================
+  if (authLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6]">
+        {/* แอนิเมชันวงกลมหมุนๆ สไตล์ Tailwind */}
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-600 mb-4"></div>
+        <p className="text-xl font-black text-brown-950 italic animate-pulse">
+          {`"Who decided the web is ready? I am checking your session..."`}
+        </p>
+      </div>
+    );
+  }
+  // =========================================================
+  // 🛡️ บล็อกที่ 2: ถ้าตรวจเสร็จแล้วไม่มีคุกกี้ล็อกอินค้างอยู่ ให้โชว์หน้าล็อกอินบล็อกไว้ก่อน
+  // =========================================================
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6] px-6">
+        <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-2xl border-t-8 border-orange-600 text-center">
+          <h2 className="text-3xl font-extrabold text-brown-950 mb-2">
+            ESCANOR PROJECT
+          </h2>
+          <p className="text-gray-500 italic mb-6">
+            "Stand at the pinnacle of power. Please Login."
+          </p>
+
+          {/* เดี๋ยวเราจะมาสร้างฟอร์มกรอก Login เล็กๆ ยิงเข้าฟังก์ชัน login ตรงนี้กันในขั้นตอนถัดไปจ้ะ */}
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-700">
+            [ เดี๋ยวเราจะมาเสียบกล่อง Login Form ]
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center pt-24 px-10 min-h-screen min-h-screen bg-[#F3F4F6] relative overflow-hidden">

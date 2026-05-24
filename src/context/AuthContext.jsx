@@ -48,9 +48,9 @@ export function AuthProvider({ children }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          body: JSON.stringify({ email, password }),
-          credentials: "include", // 🔑 สั่งให้รับคุกกี้ accessToken ที่หลังบ้านพ่นกลับมาเก็บลงบราวเซอร์
         },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // 🔑 สั่งให้รับคุกกี้ accessToken ที่หลังบ้านพ่นกลับมาเก็บลงบราวเซอร์
       });
 
       const data = await res.json();
@@ -87,11 +87,11 @@ export function AuthProvider({ children }) {
 
   // 6. 💡 ส่งสัญญาณค่า State และฟังก์ชันทั้งหมดออกไปนอกบ้าน ให้ทุก Component หยิบไปใช้ได้
   return (
-    <AuthContext.Prodvider
+    <AuthContext.Provider
       value={{ user, authLoading, authError, login, logout, checkSession }}
     >
       {children}
-    </AuthContext.Prodvider>
+    </AuthContext.Provider>
   );
 }
 // 7. 💡 ทำ Custom Hook สำหรับส่งออกไปให้ไฟล์อื่นเรียกใช้ง่ายๆ ผ่านคำสั่ง useAuth()

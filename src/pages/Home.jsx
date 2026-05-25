@@ -179,6 +179,7 @@ const Home = () => {
       <Display
         activeSection={activeSection}
         members={members}
+        setMembers={setMembers}
         handleDelete={handleDelete}
         formData={formData}
         setFormData={setFormData}

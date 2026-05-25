@@ -1,16 +1,17 @@
 import { useAuth } from "../../context/AuthContext";
-
 import Table from "../Table";
 
 const Display = ({
   activeSection,
   members,
+  setMembers, // 💡 1. รับฟังก์ชันนี้เพิ่มเข้ามา เพื่อส่งต่อสิทธิ์ให้คอมโพเนนต์ Table นำไปอัปเดตสเตทแบบเรียลไทม์
   handleDelete,
   handleCreate,
   formData,
   setFormData,
 }) => {
   const { user } = useAuth();
+
   return (
     <div className="w-full max-w-5xl mt-10 p-10 bg-white rounded-2xl shadow-xl border-t-8 border-orange-600">
       {!activeSection && (
@@ -18,6 +19,7 @@ const Display = ({
           {`"Who decided that? I will decide what to show!" - Choose a section`}
         </p>
       )}
+
       {/* 👤 โหมด User Database */}
       {activeSection === "user" && (
         <div className="text-center">
@@ -25,10 +27,12 @@ const Display = ({
             User Database
           </h2>
           <div className="text-xl text-brown-900 bg-amber-100 p-5 rounded-lg border border-yellow-500">
+            {/* 💡 ในแท็บฝั่ง User เราตั้งค่า isAdmin={false} ไว้เหมือนเดิมจ้ะ */}
             <Table data={members} isAdmin={false} />
           </div>
         </div>
       )}
+
       {/* 🛠️ โหมด Admin Control Panel */}
       {activeSection === "admin" && user.role === "admin" && (
         <div className="text-center w-full">
@@ -36,13 +40,12 @@ const Display = ({
             Admin Control Panel
           </h2>
 
-          {/* กล่องแบบฟอร์มสำหรับการสร้าง User */}
+          {/* กล่องแบบฟอร์มสำหรับการสร้าง User (คงสไตล์เดิมไว้ครบถ้วน) */}
           <div className="mb-12 p-8 bg-white rounded-xl border-4 border-amber-500 shadow-lg max-w-full">
             <h3 className="text-2xl font-black mb-6 text-brown-950 uppercase italic">
               Create User Here
             </h3>
 
-            {/* 💡 เปลี่ยนมาใช้ grid layout เพื่อให้ทุกกล่องแบ่งช่องเท่ากันอย่างสมบูรณ์แบบ ไม่เยื้องหลุดจอ */}
             <form
               onSubmit={handleCreate}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end text-left"
@@ -71,7 +74,7 @@ const Display = ({
                 </label>
                 <input
                   type="email"
-                  placeholder="Email Address" // 💡 แก้ไขตัวบอกใบ้คำให้อ่านง่ายตรงตัวแล้วจ้ะ
+                  placeholder="Email Address"
                   className="border-2 border-gray-300 p-2 rounded-lg focus:border-orange-500 outline-none w-full bg-white text-base font-normal"
                   value={formData.email}
                   onChange={(e) =>
@@ -102,7 +105,7 @@ const Display = ({
               <div className="flex flex-col gap-2">
                 <label className="font-bold text-sm text-brown-950">Role</label>
                 <select
-                  className="border-2 border-gray-300 p-2 rounded-lg focus:border-orange-500 outline-none w-full bg-white h-[44px] text-base font-normal"
+                  className="border-2 border-gray-300 p-2 rounded-lg focus-border-orange-500 outline-none w-full bg-white h-[44px] text-base font-normal"
                   value={formData.role}
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
@@ -125,9 +128,15 @@ const Display = ({
             </form>
           </div>
 
-          {/* 💡 ส่วนกล่องครอบตารางแอดมิน: ถอด text-xl ออกเพื่อไม่ให้ตัวหนังสือดันตารางจนล้นกรอบ */}
+          {/* กล่องครอบตารางแอดมิน */}
           <div className="text-base text-brown-900 bg-red-100 p-5 rounded-lg border border-red-500 w-full overflow-hidden">
-            <Table data={members} isAdmin={true} onDelete={handleDelete} />
+            {/* 💡 2. จุดสำคัญ: ทำการส่งผ่านพลังพร็อพส์ setMembers ยิงจมต่อลงไปใน <Table /> เพื่อรองรับปุ่ม Edit จ้ะ */}
+            <Table
+              data={members}
+              setMembers={setMembers}
+              isAdmin={true}
+              onDelete={handleDelete}
+            />
           </div>
         </div>
       )}

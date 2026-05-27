@@ -103,10 +103,11 @@ const Table = ({ data, isAdmin, setMembers, onDelete }) => {
 
   const handleSave = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/api/v2/users${id}`, {
+      const res = await fetch(`${API_BASE}/api/v2/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editFormData),
+        credentials: "include",
       });
 
       if (!res.ok) {

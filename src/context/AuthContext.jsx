@@ -13,11 +13,14 @@ export function AuthProvider({ children }) {
     try {
       setAuthLoading(true);
       // ยิงไปที่ Route  (GET /auth/me)
-      const res = await fetch("http://localhost:3000/api/v2/users/auth/me", {
-        method: "GET",
-        credentials: "include",
-        // 🔑 ตรงนี้สำคัญมาก! สั่งให้ fetch ยอมแนบคุกกี้ล็อกอินข้ามฝั่งไปด้วย
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v2/users/auth/me`,
+        {
+          method: "GET",
+          credentials: "include",
+          // 🔑 ตรงนี้สำคัญมาก! สั่งให้ fetch ยอมแนบคุกกี้ล็อกอินข้ามฝั่งไปด้วย
+        },
+      );
 
       if (res.ok) {
         const data = await res.json();
@@ -76,7 +79,7 @@ export function AuthProvider({ children }) {
     try {
       // ยิงไปที่ Route (POST /auth/logout)
       const res = await fetch(
-        "http://localhost:3000/api/v2/users/auth/logout",
+        `${import.meta.env.VITE_API_URL}/api/v2/users/auth/logout`,
         {
           method: "POST",
           credentials: "include", // สั่งให้ส่งคุกกี้ไปเพื่ออ้างอิงและทำลายทิ้งที่หลังบ้าน
@@ -96,7 +99,7 @@ export function AuthProvider({ children }) {
     try {
       setAuthError(null);
       // ยิงไปที่ท่อสมัครสมาชิกของหลังบ้าน (ตรวจสอบเส้นทางของหนูอีกทีน้าว่ามีคำว่า users ไหม)
-      const res = await fetch("http://localhost:3000/api/v2/users", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),

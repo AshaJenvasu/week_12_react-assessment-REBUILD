@@ -44,14 +44,17 @@ export function AuthProvider({ children }) {
     try {
       setAuthError(null); // ยิงไปที่ Route (POST /login)
 
-      const res = await fetch("http://localhost:3000/api/v2/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v2/users/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: "include", // 🔑 สั่งให้รับคุกกี้ accessToken ที่หลังบ้านพ่นกลับมาเก็บลงบราวเซอร์
         },
-        body: JSON.stringify({ email, password }),
-        credentials: "include", // 🔑 สั่งให้รับคุกกี้ accessToken ที่หลังบ้านพ่นกลับมาเก็บลงบราวเซอร์
-      });
+      );
 
       const data = await res.json();
 

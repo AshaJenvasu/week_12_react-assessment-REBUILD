@@ -7,6 +7,9 @@ import Display from "../components/Home/03_Display";
 import LoginForm from "../components/Home/04_LoginForm";
 import RegisterForm from "../components/Home/05_RegisterForm";
 
+// 🌟 1. รวมศูนย์จุดจอดพอร์ตไว้ตรงนี้ (อยู่บน Vercel จะใช้ .env ทันทีจ้ะ)
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 const Home = () => {
   const { user, authLoading } = useAuth();
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -19,15 +22,18 @@ const Home = () => {
     role: "",
   });
 
+  // 🌟 2. แก้ไขการดึงข้อมูลรายชื่อผู้ใช้ทั้งหมด (GET)
   const fetchData = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/v2/users");
+      const res = await fetch(`${API_BASE}/api/v2/users`, {
+        method: "GET",
+        credentials: "include", // 🔑 ส่งคุกกี้ล็อกอินข้ามไปขอดึงข้อมูล
+      });
       if (!res.ok) {
         throw new Error("Failed to fetch data");
       }
 
       const data = await res.json();
-      // 💡 จุดเปลี่ยนสำคัญ: เราต้องสั่งดักเข้าคีย์ .data เพื่อเอา Array ข้างในส่งให้ setMembers
       setMembers(data.data);
       console.log("Data fetched successfully:", data.data);
     } catch (error) {
@@ -44,6 +50,7 @@ const Home = () => {
     return `${baseClass} bg-white text-black border-black hover:border-orange-600`;
   };
 
+  // 🌟 3. แก้ไขการลบข้อมูลผู้ใช้ (DELETE)
   const handleDelete = async (id) => {
     if (
       !window.confirm(
@@ -52,8 +59,9 @@ const Home = () => {
     )
       return;
     try {
-      const res = await fetch(`http://localhost:3000/api/v2/users/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v2/users/${id}`, {
         method: "DELETE",
+        credentials: "include", // 🔑 แนบคุกกี้ล็อกอินเพื่อยืนยันสิทธิ์ในการลบ
       });
       if (res.ok) {
         setMembers(members.filter((member) => member._id !== id));
@@ -64,15 +72,17 @@ const Home = () => {
     }
   };
 
+  // 🌟 4. แก้ไขการสร้างข้อมูลผู้ใช้ใหม่ (POST)
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/api/v2/users", {
+      const res = await fetch(`${API_BASE}/api/v2/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        credentials: "include", // 🔑 เผื่อหลังบ้านเช็กสิทธิ์แอดมินก่อนสร้างผู้ใช้จ้ะ
       });
       if (res.ok) {
         const newMember = await res.json();
@@ -89,19 +99,16 @@ const Home = () => {
       console.error("Error creating member:", error);
     }
   };
-  // จะสั่งดึงข้อมูลผู้ใช้จากหลังบ้าน ก็ต่อเมื่อ "เช็กคุกกี้เสร็จแล้ว" และ "มีผู้ใช้ล็อกอินอยู่จริง" เท่านั้น
+
   useEffect(() => {
     if (!authLoading && user) {
       fetchData();
     }
   }, [authLoading, user]);
-  // =========================================================
-  // 🛡️ บล็อกที่ 1: หน้าจอ Loading Screen ดักวินาทีแรกสุด
-  // =========================================================
+
   if (authLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6]">
-        {/* แอนิเมชันวงกลมหมุนๆ สไตล์ Tailwind */}
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-amber-600 mb-4"></div>
         <p className="text-xl font-black text-brown-950 italic animate-pulse">
           {`"Who decided the web is ready? I am checking your session..."`}
@@ -109,9 +116,7 @@ const Home = () => {
       </div>
     );
   }
-  // =========================================================
-  // 🛡️ บล็อกที่ 2: ถ้าตรวจเสร็จแล้วไม่มีคุกกี้ล็อกอินค้างอยู่ ให้โชว์หน้าล็อกอินบล็อกไว้ก่อน
-  // =========================================================
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#F3F4F6] px-6">
@@ -125,10 +130,8 @@ const Home = () => {
               : `"Join the ranks of the mighty. Please Sign Up."`}
           </p>
 
-          {/* 💡 3. ตรวจสอบเงื่อนไข: สลับกล่องฟอร์มตามสถานะของ State ตัวบน */}
           {isLoginMode ? <LoginForm /> : <RegisterForm />}
 
-          {/* 💡 4. แถบลิงก์กดสลับโหมดด้านล่างฟอร์ม เพื่อเปลี่ยนสถานะ State ไหลลื่น */}
           <div className="mt-6 text-sm text-gray-600">
             {isLoginMode ? (
               <p>
@@ -158,7 +161,7 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col items-center pt-24 px-10 min-h-screen min-h-screen bg-[#F3F4F6] relative overflow-hidden">
+    <div className="flex flex-col items-center pt-24 px-10 min-h-screen bg-[#F3F4F6] relative overflow-hidden">
       <div className="absolute inset-0 flex justify-center items-center opacity-[0.09] pointer-events-none">
         <img
           src="https://i.pinimg.com/736x/62/5e/82/625e8280b13d400d39780172325301ad.jpg"
@@ -167,15 +170,12 @@ const Home = () => {
         />
       </div>
 
-      {/* 1. Header */}
       <Header />
-      {/* 2. Buttons Container  */}
       <NavButtons
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         getButtonClass={getButtonClass}
       />
-      {/* 3. Section Display  */}
       <Display
         activeSection={activeSection}
         members={members}

@@ -3,41 +3,40 @@ import { createContext, useContext, useEffect, useState } from "react";
 // 1. 💡 สร้างสถานีกระจายสัญญาณส่วนกลาง (Context)
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null); // เก็บข้อมูลผู้ใช้ที่ล็อกอินอยู่ (ถ้าเป็น null แปลว่ายังไม่ได้ล็อกอิน)
-  const [authLoading, setAuthLoading] = useState(true); // ใช้ล็อกหน้าจอตอนที่ระบบกำลังรีบเช็กคุกกี้ตอนเปิดเว็บครั้งแรก
-  const [authError, setAuthError] = useState(null); // ใช้เก็บข้อผิดพลาดในการล็อกอิน
+// 🌟 ปรับปรุงจุดนี้: ดักทางพอร์ต 3000 ไว้เป็นค่าเริ่มต้น ถ้าใน .env ของหนูใส่พอร์ต 3002 มันก็จะสลับไปใช้ 3002 ทันทีค่ะ!
+const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v2";
 
-  // 2. 💡 ฟังก์ชันเช็กเซสชัน (ดึงข้อมูลผู้ใช้จากคุกกี้ที่ค้างอยู่)
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null); // เก็บข้อมูลผู้ใช้ที่ล็อกอินอยู่
+  const [authLoading, setAuthLoading] = useState(true); // ล็อกหน้าจอตอนเปิดเว็บเพื่อเช็กคุกกี้
+  const [authError, setAuthError] = useState(null); // เก็บข้อผิดพลาดในการล็อกอิน
+
+  // 2. 💡 ฟังก์ชันเช็กเซสชัน (ดึงข้อมูลผู้ใช้จากคุกกี้)
   const checkSession = async () => {
     try {
       setAuthLoading(true);
-      // ยิงไปที่ Route  (GET /auth/me)
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v2/users/auth/me`,
-        {
-          method: "GET",
-          credentials: "include",
-          // 🔑 ตรงนี้สำคัญมาก! สั่งให้ fetch ยอมแนบคุกกี้ล็อกอินข้ามฝั่งไปด้วย
-        },
-      );
+      // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อให้สลับพอร์ตตาม .env ได้อย่างปลอดภัย ไม่เกิด URL ซ้อนกัน
+      const res = await fetch(`${apiBase}/users/auth/me`, {
+        method: "GET",
+        credentials: "include", // 🔑 แนบคุกกี้ล็อกอินข้ามฝั่ง
+      });
 
       if (res.ok) {
         const data = await res.json();
-        setUser(data.user); // 💡 สมมติหลังบ้านส่ง { success: true, user: userObject } ให้เซ็ตข้อมูลลง State user
+        // 💡 รองรับทั้งโครงสร้างข้อมูลของฝั่งพี่นิติ (data.user) และแบบเผื่อเลือกอื่นๆ ค่ะ
+        setUser(data.user || data.data || data);
       } else {
         setUser(null);
-        // ถ้าไม่มีโทเค็นหรือโทเค็นหมดอายุ ให้คนนั้นเป็นสถานะไม่ได้ล็อกอิน
       }
     } catch (error) {
       console.error("Error checking session:", error);
       setUser(null);
     } finally {
-      setAuthLoading(false); // เช็กเสร็จแล้ว ปลดล็อกหน้าจอโหลด
+      setAuthLoading(false);
     }
   };
 
-  // 3. 💡 สั่งให้ตรวจสอบเซสชันทันทีทุกครั้งที่หน้าเว็บถูกเปิดขึ้นมา (สเต็ปแรกสุดของเว็บ)
+  // 3. 💡 ตรวจสอบเซสชันทันทีทุกครั้งที่หน้าเว็บถูกเปิดขึ้นมา
   useEffect(() => {
     checkSession();
   }, []);
@@ -45,27 +44,27 @@ export function AuthProvider({ children }) {
   // 4. 💡 ฟังก์ชันกดยิงล็อกอิน (Login)
   const login = async (email, password) => {
     try {
-      setAuthError(null); // ยิงไปที่ Route (POST /login)
+      setAuthError(null);
 
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v2/users/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-          credentials: "include", // 🔑 สั่งให้รับคุกกี้ accessToken ที่หลังบ้านพ่นกลับมาเก็บลงบราวเซอร์
+      // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อเชื่อมต่อพอร์ตที่ถูกต้อง
+      const res = await fetch(`${apiBase}/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // 🔑 สั่งให้รับคุกกี้มาเก็บลงบราวเซอร์
+      });
 
       const data = await res.json();
 
       if (res.ok) {
-        setUser(data.user); // ล็อกอินสำเร็จ! จำค่าผู้ใช้ลง State ส่วนกลาง
+        setUser(data.user || data.data || data); // ล็อกอินสำเร็จ! จำค่าลง State
         return { success: true };
       } else {
-        setAuthError("Incorrect email or password. Please try again.");
+        setAuthError(
+          data.message || "Incorrect email or password. Please try again.",
+        );
         return { success: false, message: data.message };
       }
     } catch (error) {
@@ -77,17 +76,14 @@ export function AuthProvider({ children }) {
   // 5. 💡 ฟังก์ชันกดออกจากระบบ (Logout)
   const logout = async () => {
     try {
-      // ยิงไปที่ Route (POST /auth/logout)
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v2/users/auth/logout`,
-        {
-          method: "POST",
-          credentials: "include", // สั่งให้ส่งคุกกี้ไปเพื่ออ้างอิงและทำลายทิ้งที่หลังบ้าน
-        },
-      );
+      // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อยิงไปทำลายคุกกี้ให้ถูกพอร์ต
+      const res = await fetch(`${apiBase}/users/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
 
       if (res.ok) {
-        setUser(null); // ออกจากระบบสําเร็จ! ล้างข้อมูลผู้ใช้จาก State ส่วนกลาง
+        setUser(null); // ล้างข้อมูลผู้ใช้จาก State
       }
     } catch (error) {
       console.error("Error logging out:", error);
@@ -98,8 +94,9 @@ export function AuthProvider({ children }) {
   const register = async (username, email, password) => {
     try {
       setAuthError(null);
-      // ยิงไปที่ท่อสมัครสมาชิกของหลังบ้าน (ตรวจสอบเส้นทางของหนูอีกทีน้าว่ามีคำว่า users ไหม)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/users`, {
+
+      // 🌟 แก้ไข: ลบส่วนเกิน /api/v2 ออก เพราะตัวแปร apiBase มันมีคำนี้รวมอยู่แล้วจ้า!
+      const res = await fetch(`${apiBase}/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -108,7 +105,7 @@ export function AuthProvider({ children }) {
       const data = await res.json();
 
       if (res.ok) {
-        // 🌟 เพื่อความสะดวกสบาย สมัครเสร็จปุ๊บ สั่งเรียกฟังก์ชัน login ต่อให้เลยทันทีจ้ะ!
+        // สมัครเสร็จปุ๊บ สั่งเรียกฟังก์ชัน login ต่อให้เลยทันที
         return await login(email, password);
       } else {
         setAuthError(data.message || "Registration failed");
@@ -120,7 +117,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // 6. 💡 ส่งสัญญาณค่า State และฟังก์ชันทั้งหมดออกไปนอกบ้าน ให้ทุก Component หยิบไปใช้ได้
+  // 6. 💡 ส่งสัญญาณค่า State และฟังก์ชันทั้งหมดออกไปให้ทุก Component หยิบไปใช้
   return (
     <AuthContext.Provider
       value={{
@@ -131,14 +128,15 @@ export function AuthProvider({ children }) {
         logout,
         checkSession,
         register,
+        apiBase, // 🌟 ส่งค่า apiBase ออกไปด้วย เพื่อให้หน้าสืบค้น AI หยิบไปใช้ต่อได้ง่ายๆ จ้า
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
-// 7. 💡 ทำ Custom Hook สำหรับส่งออกไปให้ไฟล์อื่นเรียกใช้ง่ายๆ ผ่านคำสั่ง useAuth()
 
+// 7. 💡 ทำ Custom Hook สำหรับเรียกใช้ง่ายๆ ผ่านคำสั่ง useAuth()
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {

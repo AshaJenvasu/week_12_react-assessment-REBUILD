@@ -3,8 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 // 1. 💡 สร้างสถานีกระจายสัญญาณส่วนกลาง (Context)
 const AuthContext = createContext(null);
 
-// 🌟 ปรับปรุงจุดนี้: ดักทางพอร์ต 3000 ไว้เป็นค่าเริ่มต้น ถ้าใน .env ของหนูใส่พอร์ต 3002 มันก็จะสลับไปใช้ 3002 ทันทีค่ะ!
-const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v2";
+const apiBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null); // เก็บข้อมูลผู้ใช้ที่ล็อกอินอยู่
@@ -16,7 +15,7 @@ export function AuthProvider({ children }) {
     try {
       setAuthLoading(true);
       // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อให้สลับพอร์ตตาม .env ได้อย่างปลอดภัย ไม่เกิด URL ซ้อนกัน
-      const res = await fetch(`${apiBase}/users/auth/me`, {
+      const res = await fetch(`${apiBase}/api/v2/users/auth/me`, {
         method: "GET",
         credentials: "include", // 🔑 แนบคุกกี้ล็อกอินข้ามฝั่ง
       });
@@ -47,7 +46,7 @@ export function AuthProvider({ children }) {
       setAuthError(null);
 
       // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อเชื่อมต่อพอร์ตที่ถูกต้อง
-      const res = await fetch(`${apiBase}/users/login`, {
+      const res = await fetch(`${apiBase}/api/v2/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +76,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       // 🌟 แก้ไข: เปลี่ยนมาใช้ apiBase เพื่อยิงไปทำลายคุกกี้ให้ถูกพอร์ต
-      const res = await fetch(`${apiBase}/users/auth/logout`, {
+      const res = await fetch(`${apiBase}/api/v2/users/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -96,7 +95,7 @@ export function AuthProvider({ children }) {
       setAuthError(null);
 
       // 🌟 แก้ไข: ลบส่วนเกิน /api/v2 ออก เพราะตัวแปร apiBase มันมีคำนี้รวมอยู่แล้วจ้า!
-      const res = await fetch(`${apiBase}/users`, {
+      const res = await fetch(`${apiBase}/api/v2/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),

@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API_BASE = "http://localhost:3000/api/v2/users";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const EMPTY_FORM = { username: "", email: "", role: "user" };
 
@@ -104,7 +103,7 @@ const Table = ({ data, isAdmin, setMembers, onDelete }) => {
 
   const handleSave = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v2/users${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editFormData),
